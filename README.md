@@ -2,7 +2,7 @@
 
 Golang Configuration tool that support YAML, JSON, TOML, Shell Environment (Supports Go 1.10+)
 
-[![test status](https://github.com/jinzhu/configor/workflows/tests/badge.svg?branch=master "test status")](https://github.com/jinzhu/configor/actions)
+[![test status](https://github.com/CubicrootXYZ/configor/workflows/main/badge.svg?branch=master "test status")](https://github.com/CubicrootXYZ/configor/actions)
 
 ## Usage
 
@@ -11,7 +11,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinzhu/configor"
+	"github.com/CubicrootXYZ/configor"
 )
 
 var Config = struct {
@@ -200,6 +200,8 @@ func main() {
 You can help to make the project better, check out [http://gorm.io/contribute.html](http://gorm.io/contribute.html) for things you can do.
 
 ## Author
+
+This is a fork of jinzhu/configor which got developed by:
 
 **jinzhu**
 
