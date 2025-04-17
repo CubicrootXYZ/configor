@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"testing"
@@ -35,8 +34,6 @@ type testConfig struct {
 	}
 
 	Anonymous `anonymous:"true"`
-
-	private string
 }
 
 func generateDefaultConfig() testConfig {
@@ -74,13 +71,13 @@ func generateDefaultConfig() testConfig {
 func TestLoadNormaltestConfig(t *testing.T) {
 	config := generateDefaultConfig()
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 
 			var result testConfig
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 			if !reflect.DeepEqual(result, config) {
 				t.Errorf("result should equal to original configuration")
 			}
@@ -97,13 +94,13 @@ func TestLoadtestConfigFromTomlWithExtension(t *testing.T) {
 	)
 
 	if err := toml.NewEncoder(&buffer).Encode(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor.toml"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor.toml"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(buffer.Bytes())
+			_, _ = file.Write(buffer.Bytes())
 
 			var result testConfig
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 			if !reflect.DeepEqual(result, config) {
 				t.Errorf("result should equal to original configuration")
 			}
@@ -120,13 +117,13 @@ func TestLoadtestConfigFromTomlWithoutExtension(t *testing.T) {
 	)
 
 	if err := toml.NewEncoder(&buffer).Encode(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(buffer.Bytes())
+			_, _ = file.Write(buffer.Bytes())
 
 			var result testConfig
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 			if !reflect.DeepEqual(result, config) {
 				t.Errorf("result should equal to original configuration")
 			}
@@ -143,13 +140,13 @@ func TestDefaultValue(t *testing.T) {
 	config.DB.SSL = false
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 
 			var result testConfig
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 
 			if !reflect.DeepEqual(result, generateDefaultConfig()) {
 				t.Errorf("result should be set default value correctly")
@@ -165,10 +162,10 @@ func TestMissingRequiredValue(t *testing.T) {
 	config.DB.Password = ""
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 
 			var result testConfig
 			if err := Load(&result, file.Name()); err == nil {
@@ -190,7 +187,7 @@ func TestUnmatchedKeyInTomltestConfigFile(t *testing.T) {
 	}
 	config := configFile{Name: "test", Test: "ATest"}
 
-	file, err := ioutil.TempFile("/tmp", "configor")
+	file, err := os.CreateTemp("/tmp", "configor")
 	if err != nil {
 		t.Fatal("Could not create temp file")
 	}
@@ -275,7 +272,7 @@ func TestUnmatchedKeyInYamltestConfigFile(t *testing.T) {
 	}
 	config := configFile{Name: "test", Test: "ATest"}
 
-	file, err := ioutil.TempFile("/tmp", "configor")
+	file, err := os.CreateTemp("/tmp", "configor")
 	if err != nil {
 		t.Fatal("Could not create temp file")
 	}
@@ -286,7 +283,7 @@ func TestUnmatchedKeyInYamltestConfigFile(t *testing.T) {
 	filename := file.Name()
 
 	if data, err := yaml.Marshal(config); err == nil {
-		file.WriteString(string(data))
+		_, _ = file.WriteString(string(data))
 
 		var result configStruct
 
@@ -343,14 +340,14 @@ func TestLoadtestConfigurationByEnvironment(t *testing.T) {
 		APPName: "config2",
 	}
 
-	if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+	if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 		defer file.Close()
 		defer os.Remove(file.Name())
 		configBytes, _ := yaml.Marshal(config)
 		config2Bytes, _ := yaml.Marshal(config2)
-		ioutil.WriteFile(file.Name()+".yaml", configBytes, 0644)
+		_ = os.WriteFile(file.Name()+".yaml", configBytes, 0644)
 		defer os.Remove(file.Name() + ".yaml")
-		ioutil.WriteFile(file.Name()+".production.yaml", config2Bytes, 0644)
+		_ = os.WriteFile(file.Name()+".production.yaml", config2Bytes, 0644)
 		defer os.Remove(file.Name() + ".production.yaml")
 
 		var result testConfig
@@ -376,19 +373,19 @@ func TestLoadtestConfigurationByEnvironmentSetBytestConfig(t *testing.T) {
 		APPName: "production_config2",
 	}
 
-	if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+	if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 		defer file.Close()
 		defer os.Remove(file.Name())
 		configBytes, _ := yaml.Marshal(config)
 		config2Bytes, _ := yaml.Marshal(config2)
-		ioutil.WriteFile(file.Name()+".yaml", configBytes, 0644)
+		_ = os.WriteFile(file.Name()+".yaml", configBytes, 0644)
 		defer os.Remove(file.Name() + ".yaml")
-		ioutil.WriteFile(file.Name()+".production.yaml", config2Bytes, 0644)
+		_ = os.WriteFile(file.Name()+".production.yaml", config2Bytes, 0644)
 		defer os.Remove(file.Name() + ".production.yaml")
 
 		var result testConfig
 		var Configor = New(&Config{Environment: "production"})
-		if Configor.Load(&result, file.Name()+".yaml"); err != nil {
+		if err := Configor.Load(&result, file.Name()+".yaml"); err != nil {
 			t.Errorf("No error should happen when load configurations, but got %v", err)
 		}
 
@@ -408,10 +405,10 @@ func TestOverwritetestConfigurationWithEnvironmentWithDefaultPrefix(t *testing.T
 	config := generateDefaultConfig()
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 			var result testConfig
 			os.Setenv("CONFIGOR_APPNAME", "config2")
 			os.Setenv("CONFIGOR_HOSTS", "- http://example.org\n- http://jinzhu.me")
@@ -419,7 +416,7 @@ func TestOverwritetestConfigurationWithEnvironmentWithDefaultPrefix(t *testing.T
 			defer os.Setenv("CONFIGOR_APPNAME", "")
 			defer os.Setenv("CONFIGOR_HOSTS", "")
 			defer os.Setenv("CONFIGOR_DB_NAME", "")
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 
 			var defaultConfig = generateDefaultConfig()
 			defaultConfig.APPName = "config2"
@@ -436,10 +433,10 @@ func TestOverwritetestConfigurationWithEnvironment(t *testing.T) {
 	config := generateDefaultConfig()
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 			var result testConfig
 			os.Setenv("CONFIGOR_ENV_PREFIX", "app")
 			os.Setenv("APP_APPNAME", "config2")
@@ -447,7 +444,7 @@ func TestOverwritetestConfigurationWithEnvironment(t *testing.T) {
 			defer os.Setenv("CONFIGOR_ENV_PREFIX", "")
 			defer os.Setenv("APP_APPNAME", "")
 			defer os.Setenv("APP_DB_NAME", "")
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 
 			var defaultConfig = generateDefaultConfig()
 			defaultConfig.APPName = "config2"
@@ -463,10 +460,10 @@ func TestOverwritetestConfigurationWithEnvironmentThatSetBytestConfig(t *testing
 	config := generateDefaultConfig()
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 			os.Setenv("APP1_APPName", "config2")
 			os.Setenv("APP1_DB_Name", "db_name")
 			defer os.Setenv("APP1_APPName", "")
@@ -474,7 +471,7 @@ func TestOverwritetestConfigurationWithEnvironmentThatSetBytestConfig(t *testing
 
 			var result testConfig
 			var Configor = New(&Config{ENVPrefix: "APP1"})
-			Configor.Load(&result, file.Name())
+			_ = Configor.Load(&result, file.Name())
 
 			var defaultConfig = generateDefaultConfig()
 			defaultConfig.APPName = "config2"
@@ -490,10 +487,10 @@ func TestResetPrefixToBlank(t *testing.T) {
 	config := generateDefaultConfig()
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 			var result testConfig
 			os.Setenv("CONFIGOR_ENV_PREFIX", "-")
 			os.Setenv("APPNAME", "config2")
@@ -501,7 +498,7 @@ func TestResetPrefixToBlank(t *testing.T) {
 			defer os.Setenv("CONFIGOR_ENV_PREFIX", "")
 			defer os.Setenv("APPNAME", "")
 			defer os.Setenv("DB_NAME", "")
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 
 			var defaultConfig = generateDefaultConfig()
 			defaultConfig.APPName = "config2"
@@ -517,10 +514,10 @@ func TestResetPrefixToBlank2(t *testing.T) {
 	config := generateDefaultConfig()
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 			var result testConfig
 			os.Setenv("CONFIGOR_ENV_PREFIX", "-")
 			os.Setenv("APPName", "config2")
@@ -528,7 +525,7 @@ func TestResetPrefixToBlank2(t *testing.T) {
 			defer os.Setenv("CONFIGOR_ENV_PREFIX", "")
 			defer os.Setenv("APPName", "")
 			defer os.Setenv("DB_Name", "")
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 
 			var defaultConfig = generateDefaultConfig()
 			defaultConfig.APPName = "config2"
@@ -544,14 +541,14 @@ func TestReadFromEnvironmentWithSpecifiedEnvName(t *testing.T) {
 	config := generateDefaultConfig()
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 			var result testConfig
 			os.Setenv("DBPassword", "db_password")
 			defer os.Setenv("DBPassword", "")
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 
 			var defaultConfig = generateDefaultConfig()
 			defaultConfig.DB.Password = "db_password"
@@ -566,14 +563,14 @@ func TestAnonymousStruct(t *testing.T) {
 	config := generateDefaultConfig()
 
 	if bytes, err := json.Marshal(config); err == nil {
-		if file, err := ioutil.TempFile("/tmp", "configor"); err == nil {
+		if file, err := os.CreateTemp("/tmp", "configor"); err == nil {
 			defer file.Close()
 			defer os.Remove(file.Name())
-			file.Write(bytes)
+			_, _ = file.Write(bytes)
 			var result testConfig
 			os.Setenv("CONFIGOR_DESCRIPTION", "environment description")
 			defer os.Setenv("CONFIGOR_DESCRIPTION", "")
-			Load(&result, file.Name())
+			_ = Load(&result, file.Name())
 
 			var defaultConfig = generateDefaultConfig()
 			defaultConfig.Anonymous.Description = "environment description"
@@ -652,7 +649,7 @@ func TestConfigFromEnv(t *testing.T) {
 	os.Setenv("CONFIGOR_LineBreakString", "Line one\nLine two\nLine three\nAnd more lines")
 	os.Setenv("CONFIGOR_Slient", "1")
 	os.Setenv("CONFIGOR_Count", "10")
-	Load(cfg)
+	_ = Load(cfg)
 
 	if os.Getenv("CONFIGOR_LineBreakString") != cfg.LineBreakString {
 		t.Error("Failed to load value has line break from env")
@@ -680,7 +677,7 @@ type MenuList struct {
 
 func TestLoadNestedConfig(t *testing.T) {
 	adminConfig := MenuList{}
-	New(&Config{Verbose: true}).Load(&adminConfig, "admin.yml")
+	_ = New(&Config{Verbose: true}).Load(&adminConfig, "admin.yml")
 }
 
 //go:embed test/*
