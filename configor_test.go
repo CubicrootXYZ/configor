@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/BurntSushi/toml"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 type Anonymous struct {
@@ -299,8 +299,8 @@ func TestUnmatchedKeyInYamltestConfigFile(t *testing.T) {
 		if err := New(&Config{ErrorOnUnmatchedKeys: true}).Load(&result, filename); err == nil {
 			t.Errorf("Should get error when loading configuration with extra keys")
 
-			// The error should be of type *yaml.TypeError
-		} else if _, ok := err.(*yaml.TypeError); !ok {
+			// The error should be of type *yaml.UnknownFieldError
+		} else if _, ok := err.(*yaml.UnknownFieldError); !ok {
 			// || !strings.Contains(err.Error(), "not found in struct") {
 			t.Errorf("Error should be of type yaml.TypeError. Instead error is %v", err)
 		}
@@ -328,8 +328,8 @@ func TestUnmatchedKeyInYamltestConfigFile(t *testing.T) {
 	if err := New(&Config{ErrorOnUnmatchedKeys: true}).Load(&result, filename); err == nil {
 		t.Errorf("Should get error when loading configuration with extra keys")
 
-		// The error should be of type *yaml.TypeError
-	} else if _, ok := err.(*yaml.TypeError); !ok {
+		// The error should be of type *yaml.UnknownFieldError
+	} else if _, ok := err.(*yaml.UnknownFieldError); !ok {
 		// || !strings.Contains(err.Error(), "not found in struct") {
 		t.Errorf("Error should be of type yaml.TypeError. Instead error is %v", err)
 	}

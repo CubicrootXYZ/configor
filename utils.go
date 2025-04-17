@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 )
 
 // UnmatchedTomlKeysError errors are returned by the Load function when
@@ -128,8 +128,7 @@ func (c *Configor) processFile(config interface{}, file string, errorOnUnmatched
 	switch {
 	case strings.HasSuffix(file, ".yaml") || strings.HasSuffix(file, ".yml"):
 		if errorOnUnmatchedKeys {
-			decoder := yaml.NewDecoder(bytes.NewBuffer(data))
-			decoder.KnownFields(true)
+			decoder := yaml.NewDecoder(bytes.NewBuffer(data), yaml.DisallowUnknownField())
 			return decoder.Decode(config)
 		}
 		return yaml.Unmarshal(data, config)
@@ -152,8 +151,7 @@ func (c *Configor) processFile(config interface{}, file string, errorOnUnmatched
 
 		var yamlError error
 		if errorOnUnmatchedKeys {
-			decoder := yaml.NewDecoder(bytes.NewBuffer(data))
-			decoder.KnownFields(true)
+			decoder := yaml.NewDecoder(bytes.NewBuffer(data), yaml.DisallowUnknownField())
 			yamlError = decoder.Decode(config)
 		} else {
 			yamlError = yaml.Unmarshal(data, config)
@@ -161,7 +159,7 @@ func (c *Configor) processFile(config interface{}, file string, errorOnUnmatched
 
 		if yamlError == nil {
 			return nil
-		} else if yErr, ok := yamlError.(*yaml.TypeError); ok {
+		} else if yErr, ok := yamlError.(*yaml.UnknownFieldError); ok {
 			return yErr
 		}
 
