@@ -18,6 +18,7 @@ func TestUnmatchedKeyInJsonConfigFile(t *testing.T) {
 		Name string
 		Test string
 	}
+
 	config := configFile{Name: "test", Test: "ATest"}
 
 	file, err := ioutil.TempFile("/tmp", "configor")
