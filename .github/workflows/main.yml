@@ -1,0 +1,19 @@
+name: Main
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.jpg'
+      - '**.jpeg'
+      - '**.png'
+
+permissions:
+  # Required by golangci job to write annotations to the merge request.
+  contents: read
+  checks: write
+  
+jobs:
+  golang_quality:
+    uses: CubicrootXYZ/Workflows/.github/workflows/golang_quality.yaml@v0.0.18
+  golang_test:
+    uses: CubicrootXYZ/Workflows/.github/workflows/golang_test.yaml@v0.0.18
